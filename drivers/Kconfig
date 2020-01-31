@@ -7,6 +7,7 @@
 menu "Device Drivers"
 
 rsource "entropy/Kconfig"
+rsource "flash/Kconfig"
 rsource "hw_cc310/Kconfig"
 rsource "net/Kconfig"
 rsource "sensor/Kconfig"

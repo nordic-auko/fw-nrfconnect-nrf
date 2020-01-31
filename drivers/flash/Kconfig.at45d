@@ -1,0 +1,18 @@
+# Copyright (c) 2020 Nordic Semiconductor ASA
+# SPDX-License-Identifier: Apache-2.0
+
+menuconfig SPI_FLASH_AT45D
+	bool "AT45D family DataFlash driver"
+	select FLASH_HAS_DRIVER_ENABLED
+	depends on SPI
+
+if SPI_FLASH_AT45D
+
+config SPI_FLASH_AT45D_INIT_PRIORITY
+	int "Driver initialization priority"
+	default 80
+	help
+	  Device driver initialization priority.
+	  SPI driver needs to be initialized before this one.
+
+endif # SPI_FLASH_AT45D

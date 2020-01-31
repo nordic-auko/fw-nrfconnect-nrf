@@ -1,0 +1,39 @@
+# Copyright (c) 2020 Nordic Semiconductor ASA
+# SPDX-License-Identifier: Apache-2.0
+
+description: Adesto AT45D family DataFlash SPI Memory
+
+compatible: "adesto,at45d"
+
+include: [spi-device.yaml]
+
+properties:
+  jedec-id:
+    type: uint8-array
+    required: true
+    description: JEDEC ID as manufacturer ID, memory type, memory density
+
+  size:
+    type: int
+    required: true
+    description: flash capacity in bits
+
+  block-size:
+    type: int
+    required: true
+    description: flash block size in bytes
+
+  page-size:
+    type: int
+    required: true
+    description: flash page size in bytes
+
+  wp-gpios:
+    type: phandle-array
+    required: false
+    description: WPn pin
+
+  reset-gpios:
+    type: phandle-array
+    required: false
+    description: RESETn pin

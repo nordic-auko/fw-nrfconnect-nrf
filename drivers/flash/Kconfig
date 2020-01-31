@@ -1,0 +1,10 @@
+menuconfig FLASH
+	bool "Flash hardware support"
+	help
+	  Enable support for the flash hardware.
+
+if FLASH
+
+rsource "Kconfig.at45d"
+
+endif # FLASH
