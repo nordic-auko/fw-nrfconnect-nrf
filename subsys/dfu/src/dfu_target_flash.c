@@ -155,9 +155,9 @@ int dfu_target_flash_done(bool successful)
 	int rc = 0;
 
 	if (successful) {
+		rc = write_buf_to_flash();
 		offset = 0;
 		write_buf_pos = 0;
-		rc = write_buf_to_flash();
 	}
 
 	/* We leave flash_dev intact, as we might want to pick up the
