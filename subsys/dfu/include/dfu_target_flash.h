@@ -15,6 +15,7 @@
 #define DFU_TARGET_FLASH_H__
 
 #include <stddef.h>
+#include <dfu/dfu_target.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,7 +43,7 @@ bool dfu_target_flash_identify(const void *const buf);
  *
  * @retval 0 If successful, negative errno otherwise.
  */
-int dfu_target_flash_init(size_t file_size);
+int dfu_target_flash_init(size_t file_size, dfu_target_callback_t cb);
 
 /**
  * @brief Get offset of firmware

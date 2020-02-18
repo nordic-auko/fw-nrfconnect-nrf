@@ -7,6 +7,7 @@
 #include <zephyr.h>
 #include <drivers/flash.h>
 #include <logging/log.h>
+#include <dfu/dfu_target.h>
 
 LOG_MODULE_REGISTER(dfu_target_flash, CONFIG_DFU_TARGET_LOG_LEVEL);
 
@@ -89,7 +90,7 @@ int dfu_target_flash_cfg(const char *dev_name, size_t start, size_t end,
 	return 0;
 }
 
-int dfu_target_flash_init(size_t file_size)
+int dfu_target_flash_init(size_t file_size, dfu_target_callback_t cb)
 {
 	if (!flash_dev) {
 		LOG_ERR("Flash dev not initialized");
