@@ -1,0 +1,104 @@
+menu "Controller"
+
+comment "Controller configuration"
+
+module = PRESS_CONTROLLER
+module-str = Controller
+source "subsys/logging/Kconfig.template.log_config"
+
+config CONTROLLER_RATE
+	string "Testy mctest"
+	default "Test"
+
+endmenu
+
+menu "HX711 sensor"
+
+comment "HX711 sensor configuration"
+
+module = PRESS_HX711_SENSOR
+module-str = Weight sensor
+source "subsys/logging/Kconfig.template.log_config"
+
+config PRESS_HX711_SENSOR_SPI_DEV
+	string "HX711 sensor SPI device"
+	default "SPI_0"
+
+config PRESS_HX711_SENSOR_CHN_A_ENABLE
+	bool "HX711 channel A enable"
+	default y
+
+config PRESS_HX711_SENSOR_CHN_B_ENABLE
+	bool "HX711 channel B enable"
+	default y
+
+if PRESS_HX711_SENSOR_CHN_A_ENABLE
+
+choice
+	prompt "Channel A gain"
+	default PRESS_HX711_SENSOR_CHN_A_GAIN_64
+
+config PRESS_HX711_SENSOR_CHN_A_GAIN_64
+	bool "64 gain"
+
+config PRESS_HX711_SENSOR_CHN_A_GAIN_128
+	bool "128 gain"
+
+endchoice
+
+endif # PRESS_HX711_SENSOR_CHN_A_ENABLE
+
+endmenu
+
+menu "Potmeter"
+
+comment "Potmeter configuration"
+
+module = PRESS_POTMETER
+module-str = Potmeter
+source "subsys/logging/Kconfig.template.log_config"
+
+config POTMETER_VDD_VOLTAGE
+	int "Potmeter VDD voltage [mV]"
+	default 3000
+
+config POTMETER_STEP_COUNT
+	int "Potmeter step count"
+	default 500
+
+config POTMETER_SAMPLE_RATE
+	int "Potmeter sample rate [Hz]"
+    range 1 1000
+	default 100
+
+endmenu
+
+menu "Motor controller"
+
+comment "Motor controller configuration"
+
+module = PRESS_TB6612FNG
+module-str = Motor controller
+source "subsys/logging/Kconfig.template.log_config"
+
+config TB6612FNG_PWM_RATE
+	int "TB6612FNG PWM rate [Hz]"
+    range 1000 100000
+	default 50000
+
+endmenu
+
+menu "Display"
+
+comment "Display configuration"
+
+module = PRESS_DISPLAY
+module-str = Display
+source "subsys/logging/Kconfig.template.log_config"
+
+config DISPLAY_REFRESH_RATE
+	int "Display refresh rate [Hz]"
+    range 1 30
+	default 10
+
+endmenu

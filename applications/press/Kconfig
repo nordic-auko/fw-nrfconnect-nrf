@@ -1,0 +1,8 @@
+menu "Press application"
+rsource "src/modules/Kconfig"
+rsource "src/events/Kconfig"
+endmenu
+
+menu "Zephyr Kernel"
+source "Kconfig.zephyr"
+endmenu

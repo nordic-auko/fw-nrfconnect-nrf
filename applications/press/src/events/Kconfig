@@ -1,0 +1,39 @@
+#
+# Copyright (c) 2020 Nordic Semiconductor
+#
+# SPDX-License-Identifier: LicenseRef-BSD-5-Clause-Nordic
+#
+
+if LOG
+
+menu "Event options"
+
+comment "Initially logged events"
+
+config PRESS_LOG_MODULE_STATE_EVENT
+	bool "Module state event"
+	default y
+
+config PRESS_LOG_POTMETER_CTRL_EVENT
+	bool "Potmeter control event"
+	default y
+
+config PRESS_LOG_POTMETER_DATA_EVENT
+	bool "Potmeter data event"
+	default y
+
+config PRESS_LOG_HX711_CTRL_EVENT
+	bool "HX711 ctrl event"
+	default y
+
+config PRESS_LOG_HX711_DATA_EVENT
+	bool "HX711 data event"
+	default y
+
+config PRESS_LOG_TB6612FNG_CTRL_EVENT
+	bool "TB6612FNG ctrl event"
+	default y
+
+endmenu
+
+endif
