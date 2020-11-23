@@ -23,7 +23,7 @@ static int log_hx711_data_event(const struct event_header *eh, char *buf,
 	return snprintf(
 		buf,
 		buf_len,
-		"%s: 0x%08X", channel_name[event->channel], event->value);
+		"%s: %d", channel_name[event->channel], event->value);
 }
 
 EVENT_TYPE_DEFINE(hx711_data_event,

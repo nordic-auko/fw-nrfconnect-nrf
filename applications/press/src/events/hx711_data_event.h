@@ -36,7 +36,7 @@ struct hx711_data_event {
 	struct event_header header;
 
 	enum hx711_channel channel;
-	uint32_t value;
+	int32_t value;
 };
 
 EVENT_TYPE_DECLARE(hx711_data_event);

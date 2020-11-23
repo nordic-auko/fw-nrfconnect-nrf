@@ -30,7 +30,7 @@ static bool event_handler(const struct event_header *eh)
 
 			struct hx711_ctrl_event *hx711_event;
 			hx711_event = new_hx711_ctrl_event();
-			hx711_event->cmd = HX711_CMD_ENABLE;
+			hx711_event->cmd = HX711_CMD_SET_TARE_WEIGHT;
 			EVENT_SUBMIT(hx711_event);
 		}
 

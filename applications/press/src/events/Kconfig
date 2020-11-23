@@ -26,6 +26,10 @@ config PRESS_LOG_HX711_CTRL_EVENT
 	bool "HX711 ctrl event"
 	default y
 
+config PRESS_LOG_HX711_STATE_EVENT
+	bool "HX711 state event"
+	default y
+
 config PRESS_LOG_HX711_DATA_EVENT
 	bool "HX711 data event"
 	default y

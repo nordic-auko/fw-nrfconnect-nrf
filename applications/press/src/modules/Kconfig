@@ -46,6 +46,14 @@ config PRESS_HX711_SENSOR_CHN_A_GAIN_128
 
 endchoice
 
+config PRESS_HX711_TARE_DURATION
+	int "HX711 tare weight stabilization duration [s]"
+	default 10
+
+config PRESS_HX711_AVG_LENGTH
+	int "HX711 averaging filter length"
+	default 16
+
 endif # PRESS_HX711_SENSOR_CHN_A_ENABLE
 
 endmenu
