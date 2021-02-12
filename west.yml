@@ -35,6 +35,9 @@ manifest:
       url-base: https://github.com/alexa
     - name: nordicsemi
       url-base: https://github.com/NordicSemiconductor
+    - name: skyhook
+      url-base: https://github.com/SkyhookWireless
+
 
   # If not otherwise specified, the projects below should be obtained
   # from the ncs remote.
@@ -137,6 +140,18 @@ manifest:
       path: modules/lib/nanopb
       revision: nanopb-0.4.2
       remote: nanopb
+    - name: embedded-client
+      path: modules/lib/skyhook/embedded-client
+      revision: a8f4085d72eda5716d2d4ae57c616fff66d5564a
+      remote: skyhook
+    - name: embedded-protocol
+      path: modules/lib/skyhook/embedded-protocol
+      revision: 3fd5a99776246ceb28c0da5a1dd6ac6afcd280ac
+      remote: skyhook
+    - name: tiny-AES-c
+      path: modules/lib/skyhook/tiny-AES-c
+      revision: ca85e00de963102d3999ea5fa865c0deff6370d3
+      remote: skyhook
     - name: Alexa-Gadgets-Embedded-Sample-Code
       path: modules/alexa-embedded
       revision: face92d8c62184832793f518bb1f19379538c5c1

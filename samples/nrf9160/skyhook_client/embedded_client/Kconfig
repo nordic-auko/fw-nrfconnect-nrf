@@ -1,0 +1,14 @@
+#
+# Copyright (c) 2020 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config SKYHOOK_EMBEDDED_CLIENT
+	bool "Enable Skyhook embedded client library"
+
+config APP_LINK_WITH_SKYHOOK_EMBEDDED_CLIENT
+	bool "Link 'app' with Skyhook embedded client Proto headers"
+	default y
+	help
+	  Add Skyhook embedded client files to the 'app' include path.
