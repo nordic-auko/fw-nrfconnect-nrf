@@ -12,6 +12,7 @@
 #define MODULE display
 #include "module_state_event.h"
 #include "potmeter_data_event.h"
+#include "hx711_data_event.h"
 
 #include <logging/log.h>
 LOG_MODULE_REGISTER(MODULE, CONFIG_PRESS_DISPLAY_LOG_LEVEL);
@@ -29,7 +30,9 @@ K_TIMER_DEFINE(display_update_timer, display_update_timer_func, NULL);
 
 static const struct device *display_dev;
 
-static volatile uint32_t potmeter_update;
+// static volatile uint32_t potmeter_update;
+static atomic_t weight_set_point;
+static atomic_t weight_measurement;
 
 static void display_update_timer_func(struct k_timer *dummy)
 {
@@ -38,21 +41,34 @@ static void display_update_timer_func(struct k_timer *dummy)
 
 static void display_thread_func(void)
 {
-	char str[32];
+	char str[128];
+
+	int displayed_set_point = -1;
+	int displayed_measurement = -1;
 
 	display_dev = device_get_binding(CONFIG_LVGL_DISPLAY_DEV_NAME);
 	__ASSERT_NO_MSG(display_dev != NULL);
-	uint32_t display_value = 0;
+	// uint32_t display_value = 0;
+
+	int err;
+	
+	err = display_set_orientation(display_dev, DISPLAY_ORIENTATION_ROTATED_180);
+	if (err) {
+		LOG_ERR("display_set_orientation: %d", err);
+	}
 
 	lv_obj_t *label;
 	static lv_style_t font_style;
+	static lv_style_t angle_style;
 
 	lv_style_set_text_font(&font_style, LV_STATE_DEFAULT, &lv_font_montserrat_24);
+	lv_style_set_transform_angle(&angle_style, LV_STATE_DEFAULT, 90);
 
 	label = lv_label_create(lv_scr_act(), NULL);
 	lv_obj_align(label, NULL, LV_ALIGN_IN_TOP_LEFT, 40, 120);
 	lv_obj_add_style(label, LV_OBJ_PART_MAIN, &font_style);
-	snprintf(str, sizeof(str), "%d.%d kg", display_value / 10, display_value - (display_value / 10) * 10);
+	lv_obj_add_style(label, LV_OBJ_PART_MAIN, &angle_style);
+	// snprintf(str, sizeof(str), "%d.%d kg", display_value / 10, display_value - (display_value / 10) * 10);
 
 	lv_label_set_text(label, str);
 
@@ -65,15 +81,20 @@ static void display_thread_func(void)
 		K_USEC((1000000 / CONFIG_DISPLAY_REFRESH_RATE)));
 
 	while (true) {
+
 		k_sem_take(&display_update_sem, K_FOREVER);
 
-		if (display_value == potmeter_update) {
+		if (displayed_set_point == atomic_get(&weight_set_point) &&
+			displayed_measurement == atomic_get(&weight_measurement)) {
 			continue;
 		}
 
-		display_value = potmeter_update;
+		displayed_set_point = atomic_get(&weight_set_point);
+		displayed_measurement = atomic_get(&weight_measurement);
 
-		snprintf(str, sizeof(str), "%d.%d kg", display_value / 10, display_value - (display_value / 10) * 10);
+		snprintf(str, sizeof(str), "Set: %d.%d kg\nMeas: %d.%d kg\n",
+			displayed_set_point / 10, displayed_set_point - (displayed_set_point / 10) * 10,
+			displayed_measurement / 1000, displayed_measurement - (displayed_measurement / 1000) * 1000);
 		lv_label_set_text(label, str);
 
 		lv_task_handler();
@@ -103,7 +124,16 @@ static bool event_handler(const struct event_header *eh)
 		const struct potmeter_data_event *event =
 			cast_potmeter_data_event(eh);
 
-		potmeter_update = event->value;
+		atomic_set(&weight_set_point, event->value);
+
+		return false;
+	}
+
+	if (is_hx711_data_event(eh)) {
+		const struct hx711_data_event *event =
+			cast_hx711_data_event(eh);
+
+		atomic_set(&weight_measurement, event->value);
 
 		return false;
 	}
@@ -118,3 +148,4 @@ static bool event_handler(const struct event_header *eh)
 EVENT_LISTENER(MODULE, event_handler);
 EVENT_SUBSCRIBE(MODULE, module_state_event);
 EVENT_SUBSCRIBE(MODULE, potmeter_data_event);
+EVENT_SUBSCRIBE(MODULE, hx711_data_event);

@@ -19,8 +19,8 @@ enum tb6612fng_pin_types {
 };
 
 static const struct gpio_pin tb6612fng_pins[] = {
-    [TB6612FNG_PIN_IN1] = {.port = 1, .pin = 10},
-    [TB6612FNG_PIN_IN2] = {.port = 1, .pin = 11},
     [TB6612FNG_PIN_PWM] = {.port = 1, .pin = 12},
+    [TB6612FNG_PIN_IN2] = {.port = 1, .pin = 11},
+    [TB6612FNG_PIN_IN1] = {.port = 1, .pin = 10},
     [TB6612FNG_PIN_STANDBY] = {.port = 1, .pin = 8},
 };

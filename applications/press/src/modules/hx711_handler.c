@@ -21,6 +21,8 @@ LOG_MODULE_REGISTER(MODULE, CONFIG_PRESS_HX711_SENSOR_LOG_LEVEL);
 #error No channels enabled
 #endif
 
+#define HX711_SCALING_FACTOR 0.022810635f
+
 enum hx711_sample_state {
 	HX711_SAMPLE_STATE_CH_A_GAIN_128, /* 25 pulses */
 	HX711_SAMPLE_STATE_CH_B_GAIN_32,  /* 26 pulses */
@@ -151,6 +153,15 @@ static int32_t get_filtered_measurement(int32_t new_measurement)
 	return (sum / ARRAY_SIZE(avg_filter_vals));
 }
 
+static int32_t get_scaled_measurement(int32_t measurement)
+{
+	float meas_f = (float) measurement;
+
+	meas_f *= HX711_SCALING_FACTOR;
+
+	return (int32_t) meas_f;
+}
+
 static void hx711_read_work(struct k_work *work)
 {
 	static int32_t prev_scaled_value;
@@ -210,10 +221,15 @@ static void hx711_read_work(struct k_work *work)
 		// LOG_INF("Tare sum: %lld", tare_sum);
 	} else if (prev_scaled_value != scaled_value) {
 		struct hx711_data_event *event;
+		int32_t meas;
+
+		meas = get_filtered_measurement(scaled_value - tare_weight);
+		meas = get_scaled_measurement(meas);
+
 		event = new_hx711_data_event();
 		event->channel = channel;
-		// LOG_INF("Scaled value: %d", scaled_value);
-		event->value = get_filtered_measurement(scaled_value - tare_weight);
+		// LOG_INF("Scaled value: %d", scaled_value);		
+		event->value = meas;
 		EVENT_SUBMIT(event);
 	}
 

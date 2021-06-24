@@ -7,8 +7,14 @@ module-str = Controller
 source "subsys/logging/Kconfig.template.log_config"
 
 config CONTROLLER_RATE
-	string "Testy mctest"
-	default "Test"
+	int "Controller rate [Hz]"
+	range 1 100
+	default 10
+
+config CONTROLLER_HYSTERESIS
+	int "Hysteresis range [g]"
+	range 10 1000
+	default 100
 
 endmenu
 
