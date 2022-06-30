@@ -6,10 +6,10 @@ module = PRESS_CONTROLLER
 module-str = Controller
 source "subsys/logging/Kconfig.template.log_config"
 
-config CONTROLLER_RATE
-	int "Controller rate [Hz]"
-	range 1 100
-	default 10
+config CONTROLLER_CYCLE
+	int "Controller cycle [ms]"
+	range 100 10000
+	default 2500
 
 config CONTROLLER_HYSTERESIS
 	int "Hysteresis range [g]"
