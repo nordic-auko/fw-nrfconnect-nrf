@@ -13,5 +13,6 @@ endif()
 
 add_subdirectory(hw_cc310)
 add_subdirectory(entropy)
+add_subdirectory(pmic)
 add_subdirectory(serial)
 add_subdirectory_ifdef(CONFIG_WIFI wifi)

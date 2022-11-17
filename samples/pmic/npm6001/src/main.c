@@ -28,57 +28,9 @@ LOG_MODULE_REGISTER(main, CONFIG_MAIN_LOG_LEVEL);
 
 static K_SEM_DEFINE(n_int_sem, 0, 1);
 
-static const struct device *i2c_dev = DEVICE_DT_GET(DT_NODELABEL(arduino_i2c));
-
-static const struct gpio_dt_spec n_int = GPIO_DT_SPEC_GET(DT_NODELABEL(n_int), gpios);
-static struct gpio_callback n_int_callback;
-
-static uint16_t buck3_voltage;
-static bool buck3_enabled;
+static uint16_t buck3_voltage = BUCK3_DEFAULT_VOLTAGE;
+static bool buck3_enabled = true;
 static bool npm6001_gpio_set;
-
-static int lib_npm6001_platform_init(void)
-{
-	if (device_is_ready(i2c_dev)) {
-		return 0;
-	} else {
-		return -ENODEV;
-	}
-}
-
-static int lib_npm6001_twi_read(uint8_t *buf, uint8_t len, uint8_t reg_addr)
-{
-	if (IS_ENABLED(CONFIG_TEST)) {
-		memset(buf, 0, len);
-		return 0;
-	}
-
-	LOG_DBG("twi_read %d bytes @ 0x%02X", len, reg_addr);
-
-	return i2c_write_read(i2c_dev, LIB_NPM6001_TWI_ADDR,
-		&reg_addr, sizeof(reg_addr),
-		buf, len);
-}
-
-static int lib_npm6001_twi_write(const uint8_t *buf, uint8_t len, uint8_t reg_addr)
-{
-	struct i2c_msg msgs[] = {
-		{.buf = &reg_addr, .len = sizeof(reg_addr), .flags = I2C_MSG_WRITE},
-		{.buf = (uint8_t *)buf, .len = len, .flags = I2C_MSG_WRITE | I2C_MSG_STOP},
-	};
-
-	if (IS_ENABLED(CONFIG_TEST)) {
-		return 0;
-	}
-
-	if (len == 1) {
-		LOG_DBG("twi_write value 0x%02X @ 0x%02X", *buf, reg_addr);
-	} else {
-		LOG_DBG("twi_write %d bytes @ 0x%02X", len, reg_addr);
-	}
-
-	return i2c_transfer(i2c_dev, &msgs[0], ARRAY_SIZE(msgs), LIB_NPM6001_TWI_ADDR);
-}
 
 /**
  * @brief Print sample help message to log
@@ -208,13 +160,6 @@ static void button_handler(uint32_t button_state, uint32_t has_changed)
 	}
 }
 
-static void n_int_irq_handler(const struct device *port,
-					struct gpio_callback *cb,
-					gpio_port_pins_t pins)
-{
-	k_sem_give(&n_int_sem);
-}
-
 /**
  * @brief Function for initializing LEDs and Buttons.
  */
@@ -238,53 +183,10 @@ static int configure_dk_gpio(void)
 }
 
 /**
- * @brief Function for initializing nPM6001 specific GPIO.
- */
-static int configure_npm6001_gpio(void)
-{
-	int err;
-
-	err = gpio_pin_configure_dt(&n_int, GPIO_INPUT);
-	if (err) {
-		LOG_ERR("gpio_pin_configure_dt=%d", err);
-		return err;
-	}
-
-	gpio_init_callback(&n_int_callback, n_int_irq_handler, BIT(n_int.pin));
-
-	err = gpio_add_callback(n_int.port, &n_int_callback);
-	if (err) {
-		LOG_ERR("gpio_add_callback=%d", err);
-		return err;
-	}
-
-	err = gpio_pin_interrupt_configure_dt(&n_int, GPIO_INT_EDGE_TO_ACTIVE);
-	if (err) {
-		LOG_ERR("gpio_pin_interrupt_configure_dt=%d", err);
-		return err;
-	}
-
-	return 0;
-}
-
-/**
  * @brief Function for initializing nPM6001 PMIC.
  */
 static int configure_npm6001(void)
 {
-	const struct lib_npm6001_platform ncs_hw_funcs = {
-		.lib_npm6001_platform_init = lib_npm6001_platform_init,
-		.lib_npm6001_twi_read = lib_npm6001_twi_read,
-		.lib_npm6001_twi_write = lib_npm6001_twi_write,
-	};
-	int err;
-
-	err = lib_npm6001_init(&ncs_hw_funcs);
-	if (err) {
-		LOG_ERR("lib_npm6001_init=%d", err);
-		return err;
-	}
-
 	/* Enable pull-downs on mode pins in case they aren't connected to anything.
 	 * Note: this will cause an added power drain when the mode pins are actually pulled high.
 	 */
@@ -297,6 +199,7 @@ static int configure_npm6001(void)
 		LIB_NPM6001_BUCK_PIN_MODE1,
 		LIB_NPM6001_BUCK_PIN_MODE2,
 	};
+	int err;
 
 	for (int i = 0; i < ARRAY_SIZE(mode_pins); ++i) {
 		err = lib_npm6001_mode_pin_cfg(mode_pins[i], &pin_cfg);
@@ -313,64 +216,7 @@ static int configure_npm6001(void)
 		return err;
 	}
 
-	/* Set BUCK0 voltage */
-	err = lib_npm6001_vreg_voltage_set(LIB_NPM6001_BUCK0, BUCK0_DEFAULT_VOLTAGE);
-	if (err) {
-		LOG_ERR("lib_npm6001_vreg_voltage_set=%d", err);
-		return err;
-	}
-
-	/* Set BUCK1 voltage */
-	err = lib_npm6001_vreg_voltage_set(LIB_NPM6001_BUCK1, BUCK1_DEFAULT_VOLTAGE);
-	if (err) {
-		LOG_ERR("lib_npm6001_vreg_voltage_set=%d", err);
-		return err;
-	}
-
-	/* Set BUCK1 voltage */
-	err = lib_npm6001_vreg_voltage_set(LIB_NPM6001_BUCK2, BUCK2_DEFAULT_VOLTAGE);
-	if (err) {
-		LOG_ERR("lib_npm6001_vreg_voltage_set=%d", err);
-		return err;
-	}
-
-	/* Set BUCK3 voltage */
-	buck3_voltage = BUCK3_DEFAULT_VOLTAGE;
-	err = lib_npm6001_vreg_voltage_set(LIB_NPM6001_BUCK3, buck3_voltage);
-	if (err) {
-		LOG_ERR("lib_npm6001_vreg_voltage_set=%d", err);
-		return err;
-	}
-
-	/* Enable BUCK3. Unlike BUCK0, BUCK1, and BUCK2, this is not an always-on regulator. */
-	err = lib_npm6001_vreg_enable(LIB_NPM6001_BUCK3);
-	if (err) {
-		LOG_ERR("lib_npm6001_vreg_enable=%d", err);
-		return err;
-	}
-
 	buck3_enabled = true;
-
-	/* Set LDO0 voltage */
-	err = lib_npm6001_vreg_voltage_set(LIB_NPM6001_LDO0, LDO0_DEFAULT_VOLTAGE);
-	if (err) {
-		LOG_ERR("lib_npm6001_vreg_voltage_set=%d", err);
-		return err;
-	}
-
-	/* Enable LDO0. */
-	err = lib_npm6001_vreg_enable(LIB_NPM6001_LDO0);
-	if (err) {
-		LOG_ERR("lib_npm6001_vreg_enable=%d", err);
-		return err;
-	}
-
-	/* Enable LDO1. This regulator has fixed 1.8V voltage. */
-	err = lib_npm6001_vreg_enable(LIB_NPM6001_LDO1);
-	if (err) {
-		LOG_ERR("lib_npm6001_vreg_enable=%d", err);
-		return err;
-	}
 
 	const struct lib_npm6001_gpio_cfg gpio_cfg = {
 		.direction = LIB_NPM6001_GPIO_CFG_DIRECTION_OUTPUT,
@@ -437,19 +283,13 @@ void main(void)
 		goto init_error;
 	}
 
-	err = configure_npm6001_gpio();
-	if (err) {
-		LOG_ERR("configure_npm6001_gpio=%d", err);
-		goto init_error;
-	}
-
 	err = configure_npm6001();
 	if (err) {
 		LOG_ERR("configure_npm6001=%d", err);
 		goto init_error;
 	}
 
-	LOG_INF("nPM6001 successfully initialized.");
+	LOG_INF("nPM6001 successfully configured.");
 
 	err = dk_set_led_on(LED_INIT_OK);
 	if (err) {
@@ -461,43 +301,6 @@ void main(void)
 	if (err) {
 		LOG_ERR("dk_set_led_on=%d", err);
 		goto init_error;
-	}
-
-	/* Wait for interrupts */
-	while (true) {
-		k_sem_take(&n_int_sem, K_FOREVER);
-
-		/* N_INT pin will be active as long as there is one or more unread interrupts */
-		do {
-			enum lib_npm6001_int int_src;
-
-			err = lib_npm6001_int_read(&int_src);
-			if (err) {
-				LOG_ERR("lib_npm6001_int_read=%d", err);
-				break;
-			}
-
-			switch (int_src) {
-			case LIB_NPM6001_INT_THERMAL_WARNING:
-				LOG_WRN("Thermal warning interrupt");
-				break;
-			case LIB_NPM6001_INT_BUCK0_OVERCURRENT:
-				LOG_WRN("BUCK0 overcurrent interrupt");
-				break;
-			case LIB_NPM6001_INT_BUCK1_OVERCURRENT:
-				LOG_WRN("BUCK1 overcurrent interrupt");
-				break;
-			case LIB_NPM6001_INT_BUCK2_OVERCURRENT:
-				LOG_WRN("BUCK2 overcurrent interrupt");
-				break;
-			case LIB_NPM6001_INT_BUCK3_OVERCURRENT:
-				LOG_WRN("BUCK3 overcurrent interrupt");
-				break;
-			default:
-				LOG_ERR("Unknown interrupt: %d", int_src);
-				break;
-			}
-		} while (gpio_pin_get_dt(&n_int));
 	}
 
 	return;

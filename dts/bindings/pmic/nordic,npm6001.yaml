@@ -1,0 +1,55 @@
+# Copyright (c) 2022 Nordic Semiconductor ASA
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+
+description: nPM6001 power management IC
+
+compatible: "nordic,npm6001"
+
+include: i2c-device.yaml
+
+properties:
+    irq-gpios:
+      type: phandle-array
+      required: false
+      description: N_INT interrupt pin
+    buck0-voltage:
+        type: int
+        required: true
+        description: |
+          BUCK0 regulator default voltage in millivolts.
+          Valid range: 1800 mV - 3300 mV
+    buck1-voltage:
+        type: int
+        required: false
+        default: 0
+        description: |
+          BUCK1 regulator default voltage in millivolts.
+          Valid range: 700 mV - 1400 mV
+    buck2-voltage:
+        type: int
+        required: false
+        default: 0
+        description: |
+          BUCK2 regulator default voltage in millivolts.
+          Valid range: 1200 mV - 1400 mV
+    buck3-voltage:
+        type: int
+        required: false
+        default: 0
+        description: |
+          BUCK3 regulator default voltage in millivolts.
+          Valid range: 500 mV - 3300 mV
+    ldo0-voltage:
+        type: int
+        required: false
+        default: 0
+        description: |
+          LDO0 regulator default voltage in millivolts.
+          Valid range: 1800 mV - 3300 mV
+    ldo1-voltage:
+        type: int
+        required: false
+        default: 0
+        description: |
+          LDO1 regulator default voltage in millivolts.
+          Valid range: 1800 mV

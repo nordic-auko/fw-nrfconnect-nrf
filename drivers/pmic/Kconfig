@@ -1,0 +1,23 @@
+# Nordic PMIC driver for nPM6001
+#
+# Copyright (c) 2022 Nordic Semiconductor
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config PMIC_NPM6001
+	bool "nRF700x driver"
+	depends on LIB_NPM6001
+    depends on I2C
+	help
+	  Nordic nPM6001 PMIC driver
+
+if PMIC_NPM6001
+
+config PMIC_NPM6001_INIT_PRIORITY
+	int "nPM6001 init priority"
+	default 90
+	help
+	  nPM6001 initialization priority.
+
+endif # PMIC_NPM6001
