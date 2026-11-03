@@ -1,0 +1,22 @@
+
+description: |
+  nPM Fuel Gauge library virtual device for secondary cell batteries
+
+compatible: "nordic,npm-fuel-gauge-secondary"
+
+include: "nordic,npm-fuel-gauge.yaml"
+
+properties:
+  charger-device:
+    type: phandle
+    required: true
+    description: |
+      nPM PMIC charger device.
+
+      Device must implement the charger API.
+
+  runtime-charger-updates:
+    type: boolean
+    description: |
+      Indicates whether runtime adjustment to charger properties updates will happen.
+      If they are, the fuel gauge library will fetch charger configuration at runtime.

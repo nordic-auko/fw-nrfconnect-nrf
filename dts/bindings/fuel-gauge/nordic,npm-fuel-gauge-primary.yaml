@@ -1,0 +1,7 @@
+
+description: |
+  nPM Fuel Gauge library virtual device for primary cell batteries
+
+compatible: "nordic,npm-fuel-gauge-primary"
+
+include: "nordic,npm-fuel-gauge.yaml"

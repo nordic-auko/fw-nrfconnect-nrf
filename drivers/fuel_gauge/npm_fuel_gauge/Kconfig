@@ -1,0 +1,45 @@
+#
+# Copyright (c) 2026 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config NPM_FUEL_GAUGE
+	bool "nPM fuel gauge"
+	default y
+	depends on (DT_HAS_NORDIC_NPM_FUEL_GAUGE_PRIMARY_ENABLED || DT_HAS_NORDIC_NPM_FUEL_GAUGE_SECONDARY_ENABLED)
+	select NRF_FUEL_GAUGE
+	help
+	  Enable driver for the Nordic npm fuel gauge device.
+
+if DT_HAS_NORDIC_NPM_FUEL_GAUGE_PRIMARY_ENABLED
+
+choice NRF_FUEL_GAUGE_VARIANT
+	default NRF_FUEL_GAUGE_VARIANT_PRIMARY_CELL
+endchoice
+
+endif # DT_HAS_NORDIC_NPM_FUEL_GAUGE_PRIMARY_ENABLED
+
+if DT_HAS_NORDIC_NPM_FUEL_GAUGE_SECONDARY_ENABLED
+
+choice NRF_FUEL_GAUGE_VARIANT
+	default NRF_FUEL_GAUGE_VARIANT_SECONDARY_CELL
+endchoice
+
+endif # DT_HAS_NORDIC_NPM_FUEL_GAUGE_SECONDARY_ENABLED
+
+if NPM_FUEL_GAUGE
+
+config NPM_FUEL_GAUGE_THREAD_PRIORITY
+	int "Thread priority"
+	default 10
+	help
+	  Priority of thread used to read measurements and process the fuel gauge algorithm.
+
+config NPM_FUEL_GAUGE_THREAD_STACK_SIZE
+	int "Thread stack size"
+	default 2048
+	help
+	  Stack size of thread used to read measurements and process the fuel gauge algorithm.
+
+endif # NPM_FUEL_GAUGE

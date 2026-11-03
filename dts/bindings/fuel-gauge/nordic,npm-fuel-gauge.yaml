@@ -1,0 +1,59 @@
+
+description: |
+  nPM Fuel Gauge library virtual device common properties
+
+include: [fuel-gauge.yaml]
+
+properties:
+  sensor-device:
+    type: phandle
+    required: true
+    description: |
+      nPM PMIC sensor device.
+
+      Device must implement the sensor API.
+
+  processing-interval:
+    type: int
+    default: 1000
+    description: |
+      Default processing interval in milliseconds.
+      This is the interval at which the fuel gauge library will process the sensor data
+      and update the fuel gauge state.
+
+  battery-model:
+    type: string
+    required: false
+    description: |
+      Name of the battery model to use for the fuel gauge.
+      The battery model must be registered in the iterable section
+      "battery_model" or "battery_model_primary" in ROM.
+      If not set, battery model must be set at runtime using driver API.
+
+  idle-current-ua:
+    type: int
+    default: 5
+    description: |
+      Default idle current in microamperes.
+      This value will be used as the default system idle current for the fuel gauge library when the
+      low power state is set.
+
+  temperature-measurement:
+    type: string
+    default: "ntc"
+    enum:
+      - "ntc"
+      - "die"
+      - "static"
+    description: |
+      Temperature measurement method to use for the fuel gauge.
+      Options are:
+        - ntc: Use an NTC thermistor for temperature measurement.
+        - die: Use the die temperature of the PMIC.
+        - static: Use a static temperature value specified by static-temperature.
+
+  static-temperature:
+    type: int
+    default: 25
+    description: |
+      Static temperature value in Celsius to use when temperature-measurement is set to static.
