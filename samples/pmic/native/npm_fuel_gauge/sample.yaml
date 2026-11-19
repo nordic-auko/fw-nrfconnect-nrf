@@ -1,0 +1,25 @@
+# Copyright (c) 2023 Nordic Semiconductor ASA
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+sample:
+  name: Fuel gauge sample
+  description: Fuel gauge sample for Nordic PMICs
+common:
+  integration_platforms:
+    - nrf54l15dk/nrf54l15/cpuapp
+  platform_allow:
+    - nrf54l15dk/nrf54l15/cpuapp
+  tags:
+    - pmic
+    - ci_samples_pmic
+    - sysbuild
+tests:
+  sample.npm1300_fuel_gauge_compile:
+    sysbuild: true
+    build_only: true
+    extra_args:
+      - EXTRA_DTC_OVERLAY_FILE=npm1300.overlay
+  sample.npm1304_fuel_gauge_compile:
+    sysbuild: true
+    build_only: true
+    extra_args:
+      - EXTRA_DTC_OVERLAY_FILE=npm1304.overlay
